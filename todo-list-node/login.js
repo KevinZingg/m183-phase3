@@ -1,6 +1,6 @@
-const dbConnect = require('./db');
+const dbConnect = require('./fw/db');
 
-async function handleLogin(req) {
+async function handleLogin(req, res) {
     let msg = '';
 
     if(typeof req.query.username !== 'undefined' && typeof req.query.password !== 'undefined') {
@@ -8,7 +8,26 @@ async function handleLogin(req) {
         let result = await validateLogin(req.query.username, req.query.password);
 
         if(result.valid) {
-            // do the session here
+            // Login is correct. Store username in session.
+            // TODO: ev. mit cookies lösen
+            /*
+            req.sessionStorage.setItem('username', req.query.username);
+            req.sessionStorage.setItem('userid', result.userId);
+
+             */
+            /*
+            setcookie("username", $username, -1, "/"); // 86400 = 1 day
+            setcookie("userid", $db_id, -1, "/"); // 86400 = 1 day
+
+             */
+            // Redirect to index.php
+            /*
+            header("Location: index.php");
+            exit();
+
+             */
+            //req.redirect('/');
+            //res.redirect('/');
             msg = result.msg;
         } else {
             msg = result.msg;
@@ -19,7 +38,7 @@ async function handleLogin(req) {
 }
 
 async function validateLogin (username, password) {
-    let result = { valid: false, msg: '' };
+    let result = { valid: false, msg: '', userId: 0 };
 
     // Connect to the database
     const dbConnection = await dbConnect();
@@ -36,18 +55,8 @@ async function validateLogin (username, password) {
 
             // Verify the password
             if (password == db_password) {
-                // Password is correct, store username in session
-                /*
-                setcookie("username", $username, -1, "/"); // 86400 = 1 day
-                setcookie("userid", $db_id, -1, "/"); // 86400 = 1 day
-
-                 */
-                // Redirect to index.php
-                /*
-                header("Location: index.php");
-                exit();
-
-                 */
+                result.userId = db_id;
+                result.valid = true;
                 result.msg = 'login correct';
             } else {
                 // Password is incorrect

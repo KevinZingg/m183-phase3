@@ -4,6 +4,7 @@ const path = require('path');
 const header = require('./fw/header');
 const footer = require('./fw/footer');
 const login = require('./login');
+const index = require('./index');
 
 const app = express();
 const PORT = 3000;
@@ -22,12 +23,32 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Routen
 app.get('/', (req, res) => {
-    res.send(wrapContent(``));
+    if(activeUserSession(req)) {
+        res.send(wrapContent(index.html));
+    } else {
+        res.redirect('login');
+    }
+});
+
+// edit task
+app.get('/edit', (req, res) => {
+    if(activeUserSession(req)) {
+        res.send(wrapContent(''));
+    } else {
+        res.redirect('/');
+    }
 });
 
 // Login-Seite anzeigen
 app.get('/login', async (req, res) => {
-    res.send(wrapContent(await login(req)));
+    let content = await login(req, res);
+    res.send(wrapContent(content));
+});
+
+// Logout
+app.get('/logout', (req, res) => {
+    req.session.destroy();
+    res.redirect('/');
 });
 
 // Profilseite anzeigen
@@ -39,9 +60,13 @@ app.get('/profile', (req, res) => {
     }
 });
 
-// Logout
-app.get('/logout', (req, res) => {
-    req.session.destroy();
+// save task
+app.get('/savetask', (req, res) => {
+    res.redirect('/');
+});
+
+// search
+app.get('/search', (req, res) => {
     res.redirect('/');
 });
 
@@ -52,4 +77,9 @@ app.listen(PORT, () => {
 
 function wrapContent(content) {
     return header+content+footer;
+}
+
+function activeUserSession(req) {
+    // TODO: implement logic
+    return true;
 }
