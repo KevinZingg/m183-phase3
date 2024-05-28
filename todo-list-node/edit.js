@@ -1,3 +1,7 @@
+function getHtml(req) {
+
+}
+
 /*
 <?php
 // Check if the user is logged in
@@ -75,5 +79,5 @@ require_once 'fw/header.php';
 <?php
 require_once 'fw/footer.php';
     ?>
-    
+
  */

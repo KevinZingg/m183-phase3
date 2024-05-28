@@ -1,47 +1,38 @@
-const dbConnect = require('./fw/db');
+const db = require('./fw/db');
 
 async function handleLogin(req, res) {
     let msg = '';
+    let user = { 'username': '', 'userid': 0 };
 
     if(typeof req.query.username !== 'undefined' && typeof req.query.password !== 'undefined') {
         // Get username and password from the form and call the validateLogin
         let result = await validateLogin(req.query.username, req.query.password);
 
         if(result.valid) {
-            // Login is correct. Store username in session.
-            // TODO: ev. mit cookies lösen
-            /*
-            req.sessionStorage.setItem('username', req.query.username);
-            req.sessionStorage.setItem('userid', result.userId);
-
-             */
-            /*
-            setcookie("username", $username, -1, "/"); // 86400 = 1 day
-            setcookie("userid", $db_id, -1, "/"); // 86400 = 1 day
-
-             */
-            // Redirect to index.php
-            /*
-            header("Location: index.php");
-            exit();
-
-             */
-            //req.redirect('/');
-            //res.redirect('/');
+            // Login is correct. Store user information to be returned.
+            user.username = req.query.username;
+            user.userid = result.userId;
             msg = result.msg;
         } else {
             msg = result.msg;
         }
     }
 
-    return msg + getHtml();
+    return { 'html': msg + getHtml(), 'user': user };
+}
+
+function startUserSession(res, user) {
+    console.log('login valid... start user session now for userid '+user.userid);
+    res.cookie('username', user.username);
+    res.cookie('userid', user.userid);
+    res.redirect('/');
 }
 
 async function validateLogin (username, password) {
     let result = { valid: false, msg: '', userId: 0 };
 
     // Connect to the database
-    const dbConnection = await dbConnect();
+    const dbConnection = await db.connectDB();
 
     const sql = `SELECT id, username, password FROM users WHERE username='`+username+`'`;
     try {
@@ -151,4 +142,7 @@ function getHtml() {
     </form>`;
 }
 
-module.exports = handleLogin;
+module.exports = {
+    handleLogin: handleLogin,
+    startUserSession: startUserSession
+};

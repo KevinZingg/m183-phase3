@@ -1,10 +1,13 @@
 const express = require('express');
 const session = require('express-session');
+const cookieParser = require('cookie-parser');
 const path = require('path');
 const header = require('./fw/header');
 const footer = require('./fw/footer');
 const login = require('./login');
 const index = require('./index');
+const adminUser = require('./admin/users');
+const test = require("node:test");
 
 const app = express();
 const PORT = 3000;
@@ -20,20 +23,32 @@ app.use(session({
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(cookieParser());
 
 // Routen
-app.get('/', (req, res) => {
-    if(activeUserSession(req)) {
-        res.send(wrapContent(index.html));
+app.get('/', async (req, res) => {
+    if (activeUserSession(req)) {
+        let html = await wrapContent(index.html(req), req)
+        res.send(html);
     } else {
         res.redirect('login');
     }
 });
 
 // edit task
+app.get('/admin/users', async (req, res) => {
+    if(activeUserSession(req)) {
+        let html = await wrapContent(await adminUser.html, req);
+        res.send(html);
+    } else {
+        res.redirect('/');
+    }
+});
+
+// edit task
 app.get('/edit', (req, res) => {
     if(activeUserSession(req)) {
-        res.send(wrapContent(''));
+        //res.send(wrapContent(''), req);
     } else {
         res.redirect('/');
     }
@@ -41,14 +56,22 @@ app.get('/edit', (req, res) => {
 
 // Login-Seite anzeigen
 app.get('/login', async (req, res) => {
-    let content = await login(req, res);
-    res.send(wrapContent(content));
+    let content = await login.handleLogin(req, res);
+
+    if(content.user.userid !== 0) {
+        // login was successful... set cookies and redirect to /
+        login.startUserSession(res, content.user);
+    } else {
+        // login unsuccessful or not made jet... display login form
+        let html = await wrapContent(content.html, req);
+        res.send(html);
+    }
 });
 
 // Logout
 app.get('/logout', (req, res) => {
     req.session.destroy();
-    res.redirect('/');
+    res.redirect('/login');
 });
 
 // Profilseite anzeigen
@@ -75,11 +98,14 @@ app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });
 
-function wrapContent(content) {
-    return header+content+footer;
+async function wrapContent(content, req) {
+    let headerHtml = await header(req);
+    return headerHtml+content+footer;
 }
 
 function activeUserSession(req) {
-    // TODO: implement logic
-    return true;
+    // check if cookie with user information ist set
+    console.log('in activeUserSession');
+    console.log(req.cookies);
+    return req.cookies !== 'undefined' && req.cookies.username !== 'undefined' && req.cookies.username !== '';
 }

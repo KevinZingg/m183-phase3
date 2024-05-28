@@ -1,5 +1,8 @@
-function getHtml() {
-    return `<!DOCTYPE html>
+const login = require('../login');
+const db = require('../fw/db');
+
+async function getHtml(req) {
+    let content = `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -11,20 +14,40 @@ function getHtml() {
 </head>
 <body>
     <header>
-        <div>This is the insecure m183 test app</div>
-        <?php  if (isset($_COOKIE['userid'])) { ?>
+        <div>This is the insecure m183 test app</div>`;
+
+    let id = 0;
+    let roleid = 0;
+    console.log(req.cookies.userid);
+    if(req.cookies.userid !== 'undefined') {
+        id = req.cookies.userid;
+        let stmt = await db.executeStatement("select users.id userid, roles.id roleid, roles.title rolename from users inner join permissions on users.id = permissions.userid inner join roles on permissions.roleID = roles.id where userid = "+id);
+        console.log(stmt);
+
+        // load role from db
+        if(stmt.length > 0) {
+            roleid = stmt[0].roleid;
+        }
+
+        content += `
         <nav>
             <ul>
-                <li><a href="/">Tasks</a></li>
-                <?php if ($roleid == 1) { ?>
-                    <li><a href="/admin/users">User List</a></li>
-                <?php } ?>
+                <li><a href="/">Tasks</a></li>`;
+        if(roleid === 1) {
+            content += `
+                <li><a href="/admin/users">User List</a></li>`;
+        }
+        content += `
                 <li><a href="/logout">Logout</a></li>
             </ul>
-        </nav>
-        <?php  } ?>
+        </nav>`;
+    }
+
+    content += `
     </header>
     <main>`;
+
+    return content;
 }
 
-module.exports = getHtml();
+module.exports = getHtml;

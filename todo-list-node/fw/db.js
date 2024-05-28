@@ -12,4 +12,10 @@ async function connectDB() {
     }
 }
 
-module.exports = connectDB;
+async function executeStatement(statement) {
+    let conn = await connectDB();
+    const [results, fields] = await conn.query(statement);
+    return results;
+}
+
+module.exports = { connectDB: connectDB, executeStatement: executeStatement };
