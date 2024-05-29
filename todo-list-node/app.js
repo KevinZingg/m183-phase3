@@ -7,7 +7,8 @@ const footer = require('./fw/footer');
 const login = require('./login');
 const index = require('./index');
 const adminUser = require('./admin/users');
-const test = require("node:test");
+const editTask = require('./edit');
+const saveTask = require('./savetask');
 
 const app = express();
 const PORT = 3000;
@@ -28,7 +29,7 @@ app.use(cookieParser());
 // Routen
 app.get('/', async (req, res) => {
     if (activeUserSession(req)) {
-        let html = await wrapContent(index.html(req), req)
+        let html = await wrapContent(await index.html(req), req)
         res.send(html);
     } else {
         res.redirect('login');
@@ -46,9 +47,10 @@ app.get('/admin/users', async (req, res) => {
 });
 
 // edit task
-app.get('/edit', (req, res) => {
-    if(activeUserSession(req)) {
-        //res.send(wrapContent(''), req);
+app.get('/edit', async (req, res) => {
+    if (activeUserSession(req)) {
+        let html = await wrapContent(await editTask.html(req), req);
+        res.send(html);
     } else {
         res.redirect('/');
     }
@@ -84,8 +86,13 @@ app.get('/profile', (req, res) => {
 });
 
 // save task
-app.get('/savetask', (req, res) => {
-    res.redirect('/');
+app.post('/savetask', async (req, res) => {
+    if (activeUserSession(req)) {
+        let html = await wrapContent(await saveTask.html(req), req);
+        res.send(html);
+    } else {
+        res.redirect('/');
+    }
 });
 
 // search
