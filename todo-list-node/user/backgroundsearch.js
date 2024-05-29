@@ -1,4 +1,4 @@
-function getHtml() {
+function getHtml(req) {
     return `
 <section id="search">
     <h2>Search</h2>
@@ -31,10 +31,10 @@ function getHtml() {
             submitHandler: function (form) {
                 provider = $("#searchurl").val();
                 terms = $("#terms").val();
-                userid = <?php echo $_COOKIE["userid"] ?>;
+                userid = `+req.cookies.userid+`;
                 $("#msg").show();
                 $("#result").html("");
-                $.post("search.php", { provider: provider, terms: terms, userid: userid }, function(data){
+                $.post("search", { provider: provider, terms: terms, userid: userid }, function(data){
                     console.log(data);
                     $("#result").html(data);
                     $("#msg").hide(500);
@@ -49,19 +49,6 @@ function getHtml() {
 </section>`;
 }
 
-/*
-<?php
-if (!isset($_COOKIE['username'])) {
-    header("Location: ../login.php");
-    exit();
-}
-
-require_once 'fw/db.php';
-    ?>
-
- */
-
-
 module.exports = {
-    html: getHtml()
+    html: getHtml
 }

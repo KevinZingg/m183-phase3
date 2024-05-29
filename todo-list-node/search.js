@@ -1,47 +1,85 @@
-/*
-<?php
+const axios = require('axios');
+const querystring = require('querystring');
 
-if (!isset($_POST["provider"]) || !isset($_POST["terms"]) || !isset($_POST["userid"])){
-    exit("Not enough information provided");
+async function getHtml(req) {
+    if (req.body.provider === undefined || req.body.terms === undefined || req.body.userid === undefined){
+        return "Not enough information provided";
+    }
+
+    let provider = req.body.provider;
+    let terms = req.body.terms;
+    let userid = req.body.userid;
+
+    await sleep(1000); // this is a long, long search!!
+
+    let theUrl='http://localhost:3000'+provider+'?userid='+userid+'&terms='+terms;
+    let result = await callAPI('GET', theUrl, false);
+    return result;
 }
 
-$provider = $_POST["provider"];
-$terms = $_POST["terms"];
-$userid = $_POST["userid"];
+async function callAPI(method, url, data){
+    let noResults = 'No results found!';
+    let result;
 
-sleep(1); // this is a long, long search!!
-
-function callAPI($method, $url, $data){
-    $curl = curl_init();
-    switch ($method){
+    switch (method){
         case "POST":
-            curl_setopt($curl, CURLOPT_POST, 1);
-            if ($data)
-                curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
+            if (data) {
+                result = await axios.post(url, data)
+                    .then(response => {
+                        return response.data;
+                    })
+                    .catch(error => {
+                        return noResults;
+                    });
+            } else {
+                result = await axios.post(url)
+                    .then(response => {
+                        return response.data;
+                    })
+                    .catch(error => {
+                        return noResults;
+                    });
+            }
             break;
         case "PUT":
-            curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "PUT");
-            if ($data)
-                curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
+            if (data) {
+                result = await axios.put(url, data)
+                    .then(response => {
+                        return response.data;
+                    })
+                    .catch(error => {
+                        return noResults;
+                    });
+            } else {
+                result = await axios.put(url)
+                    .then(response => {
+                        return response.data;
+                    })
+                    .catch(error => {
+                        return noResults;
+                    });
+            }
             break;
         default:
-            if ($data)
-                $url = sprintf("%s?%s", $url, http_build_query($data));
+            if (data)
+                url = url+'?'+querystring.stringify(data);
+
+            result = await axios.get(url)
+                .then(response => {
+                    return response.data;
+                })
+                .catch(error => {
+                    return noResults;
+                });
     }
-    // OPTIONS:
-    curl_setopt($curl, CURLOPT_URL, $url);
-    curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-    // EXECUTE:
-    $result = curl_exec($curl);
-    if(!$result){$result = "No results found!";}
-    curl_close($curl);
-    return $result;
+
+    return result ? result : noResults;
 }
 
+function sleep(ms) {
+    return new Promise((resolve) => {
+        setTimeout(resolve, ms);
+    });
+}
 
-$theurl='http://localhost'.$provider.'?userid='.$userid.'&terms='.$terms;
-$get_data = callAPI('GET', $theurl, false);
-
-echo $get_data;
-    ?>
-*/
+module.exports = { html: getHtml };

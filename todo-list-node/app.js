@@ -9,6 +9,8 @@ const index = require('./index');
 const adminUser = require('./admin/users');
 const editTask = require('./edit');
 const saveTask = require('./savetask');
+const search = require('./search');
+const searchProvider = require('./search/v2/index');
 
 const app = express();
 const PORT = 3000;
@@ -35,6 +37,15 @@ app.get('/', async (req, res) => {
         res.redirect('login');
     }
 });
+
+app.post('/', async (req, res) => {
+    if (activeUserSession(req)) {
+        let html = await wrapContent(await index.html(req), req)
+        res.send(html);
+    } else {
+        res.redirect('login');
+    }
+})
 
 // edit task
 app.get('/admin/users', async (req, res) => {
@@ -96,9 +107,17 @@ app.post('/savetask', async (req, res) => {
 });
 
 // search
-app.get('/search', (req, res) => {
-    res.redirect('/');
+app.post('/search', async (req, res) => {
+    let html = await search.html(req);
+    res.send(html);
 });
+
+// search provider
+app.get('/search/v2/', async (req, res) => {
+    let result = await searchProvider.search(req);
+    res.send(result);
+});
+
 
 // Server starten
 app.listen(PORT, () => {
