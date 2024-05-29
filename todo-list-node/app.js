@@ -84,6 +84,8 @@ app.get('/login', async (req, res) => {
 // Logout
 app.get('/logout', (req, res) => {
     req.session.destroy();
+    res.cookie('username','');
+    res.cookie('userid','');
     res.redirect('/login');
 });
 
@@ -133,5 +135,5 @@ function activeUserSession(req) {
     // check if cookie with user information ist set
     console.log('in activeUserSession');
     console.log(req.cookies);
-    return req.cookies !== 'undefined' && req.cookies.username !== 'undefined' && req.cookies.username !== '';
+    return req.cookies !== undefined && req.cookies.username !== undefined && req.cookies.username !== '';
 }
