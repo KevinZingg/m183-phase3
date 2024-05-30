@@ -63,62 +63,7 @@ async function validateLogin (username, password) {
     } catch (err) {
         console.log(err);
     }
-
-    /*
-    dbConnection.query(sql, (err, results, fields) => {
-        if (err) {
-            console.error('Fehler beim Ausführen des SELECT-Statements: ' + err.stack);
-            return;
-        }
-
-        console.log('Ergebnisse des SELECT-Statements:');
-        console.log(results);
-
-        // Verbindung schließen
-        connection.end((err) => {
-            if (err) {
-                console.error('Fehler beim Schließen der Verbindung: ' + err.stack);
-                return;
-            }
-            console.log('Verbindung erfolgreich geschlossen.');
-        });
-    })
-
-     */
-    // Check if the form is submitted
-    /*
-        // Prepare SQL statement to retrieve user from database
-        $stmt = $conn->prepare("SELECT id, username, password FROM users WHERE username='$username'");
-
-        // Execute the statement
-        $stmt->execute();
-        // Store the result
-        $stmt->store_result();
-        // Check if username exists
-        if ($stmt->num_rows > 0) {
-            // Bind the result variables
-            $stmt->bind_result($db_id, $db_username, $db_password);
-            // Fetch the result
-            $stmt->fetch();
-            // Verify the password
-            if ($password == $db_password) {
-                // Password is correct, store username in session
-                setcookie("username", $username, -1, "/"); // 86400 = 1 day
-                setcookie("userid", $db_id, -1, "/"); // 86400 = 1 day
-                // Redirect to index.php
-                header("Location: index.php");
-                exit();
-            } else {
-                // Password is incorrect
-                echo "Incorrect password";
-            }
-        } else {
-        }
-
-        // Close statement
-        $stmt->close();
-     */
-
+    
     return result;
 }
 
