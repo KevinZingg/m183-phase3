@@ -4,5 +4,10 @@ Diese Applikation ist bewusst unsicher programmiert und sollte nie in produktive
 Die Applikation wird im Rahmen der LB2 im [Modul 183](https://gitlab.com/ch-tbz-it/Stud/m183/m183) durch die Lernenden bearbeitet.
 
 ## Hinweise zur Installation
-Bevor mit `docker compose up` die Applikation gestartet wird, muss der Source-Pfad für's Volume an Ihre Umgebung angepasst werden (dass die todo-list-Applikation auch korrekt in den Container rein gelinkt wird). Wichtig: die DB wird nicht automatisch erzeugt. Verbinden Sie sich dafür mit einem SQL-Client Ihrer Wahl auf den Datenbankcontainer (localhost port 3306) und verwenden Sie [m183_lb2.sql](./todo-list/m183_lb2.sql), um die Datenbank / Datenstruktur zu erzeugen. Beachten Sie, dass die Datenbank nach einem "neu bauen" des Containers wieder weg sein wird und Sie diese nochmals anlegen müssten.
+Die Applikation steht als PHP- oder NodeJS-Applikation zur Verfügung. Abhängig davon, ob Sie die LB2 mit PHP oder NodeJS umsetzen möchten, müssen Sie entweder compose.php.yaml oder compose.node.yaml dem Docker-Compose-Befehl mit übergeben:
+* PHP: `docker compose -f compose.php.yaml up`
+* NodeJS: `docker compose -f compose.node.yaml up`
 
+Bei NodeJS müssen vor dem Start der Container noch mit `npm install` die Abhängigkeiten installiert werden (wichtig: der Befehl muss innerhalb vom `todo-list-node`-Verzeichnis ausgeführt werden).
+
+Wichtig: der Port 80 muss auf Ihrem Lokalen Rechner zur Verfügung stehen. Wird dieser bereits verwendet, können Sie in der `compose.php.yaml` respektive in der `compose.node.yaml` den Port so anpassen, dass die Applikation auf einem anderen Port wie dem Port 80 zur Verfügung steht.
