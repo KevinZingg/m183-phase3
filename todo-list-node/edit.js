@@ -1,4 +1,5 @@
 const db = require('./fw/db');
+const { encode } = require('html-entities');
 
 async function getHtml(req) {
     let title = '';
@@ -7,16 +8,16 @@ async function getHtml(req) {
     let html = '';
     let options = ["Open", "In Progress", "Done"];
 
-    if(req.query.id !== undefined) {
-        console.log('req.query: ')
+    if (req.query.id !== undefined) {
+        console.log('req.query: ');
         console.log(req.query);
         console.log(req.query.id);
         taskId = req.query.id;
         let conn = await db.connectDB();
-        let [result, fields] = await conn.query('select ID, title, state from tasks where ID = '+taskId);
-        if(result.length > 0) {
-            title = result[0].title;
-            state = result[0].state;
+        let [result, fields] = await conn.query('SELECT ID, title, state FROM tasks WHERE ID = ?', [taskId]);
+        if (result.length > 0) {
+            title = encode(result[0].title);
+            state = encode(result[0].state);
         }
 
         html += `<h1>Edit Task</h1>`;
@@ -26,26 +27,26 @@ async function getHtml(req) {
 
     html += `
     <form id="form" method="post" action="savetask">
-        <input type="hidden" name="id" value="`+taskId+`" />
+        <input type="hidden" name="id" value="${taskId}" />
         <div class="form-group">
             <label for="title">Description</label>
-            <input type="text" class="form-control size-medium" name="title" id="title" value="`+title+`">
+            <input type="text" class="form-control size-medium" name="title" id="title" value="${title}">
         </div>
         <div class="form-group">
             <label for="state">State</label>
             <select name="state" id="state" class="size-auto">`;
 
-    for(let i = 0; i < options.length; i++) {
+    for (let i = 0; i < options.length; i++) {
         let selected = state === options[i].toLowerCase() ? 'selected' : '';
-        html += `<span>`+options[1]+`</span>`;
-        html += `<option value='`+options[i].toLowerCase()+`' `+selected+`>`+options[i]+`</option>`;
+        html += `<span>${options[i]}</span>`;
+        html += `<option value="${options[i].toLowerCase()}" ${selected}>${options[i]}</option>`;
     }
 
     html += `
             </select>
         </div>
         <div class="form-group">
-            <label for="submit" ></label>
+            <label for="submit"></label>
             <input id="submit" type="submit" class="btn size-auto" value="Submit" />
         </div>
     </form>
@@ -70,4 +71,4 @@ async function getHtml(req) {
     return html;
 }
 
-module.exports = { html: getHtml }
+module.exports = { html: getHtml };

@@ -1,15 +1,22 @@
-name: m183_lb2_php
+name: m183_lb2_node
 include:
   - ./compose.db.yaml
 services:
   web:
-      build: ./php/
-      container_name: m183-lb2-web
-      environment:
-        - DBSERVER=m183-lb2-db
-      ports:
-        - "80:80"
-      volumes:
-        - type: bind
-          source: ../todo-list-php
-          target: /var/www/html
+    image: node:latest
+    user: "node"
+    working_dir: /home/node/app
+    container_name: m183-lb2-web
+    environment:
+      - DBSERVER=m183-lb2-db
+      - NODE_ENV=production
+    ports:
+      - "443:443"
+    volumes:
+      - type: bind
+        source: ../todo-list-node
+        target: /home/node/app
+      - type: bind
+        source: ./certs
+        target: /etc/ssl/certs
+    command: "npm start"

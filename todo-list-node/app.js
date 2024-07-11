@@ -1,3 +1,6 @@
+require('dotenv').config();
+const https = require('https');
+const fs = require('fs');
 const express = require('express');
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
@@ -13,11 +16,27 @@ const search = require('./search');
 const searchProvider = require('./search/v2/index');
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 443;
+
+// Debug: List contents of /home/node/app/certs
+const certDir = path.join(__dirname, 'certs');
+fs.readdir(certDir, (err, files) => {
+    if (err) {
+        console.error('Debug: Error reading cert directory:', err);
+    } else {
+        console.log('Debug: Cert directory contents:', files);
+    }
+});
+
+// Load SSL certificate and key
+const options = {
+    key: fs.readFileSync(path.join(certDir, 'localhost.key')),
+    cert: fs.readFileSync(path.join(certDir, 'localhost.crt'))
+};
 
 // Middleware für Session-Handling
 app.use(session({
-    secret: 'secret',
+    secret: process.env.SESSION_SECRET,
     resave: true,
     saveUninitialized: true
 }));
@@ -45,11 +64,11 @@ app.post('/', async (req, res) => {
     } else {
         res.redirect('login');
     }
-})
+});
 
 // edit task
 app.get('/admin/users', async (req, res) => {
-    if(activeUserSession(req)) {
+    if (activeUserSession(req)) {
         let html = await wrapContent(await adminUser.html, req);
         res.send(html);
     } else {
@@ -71,7 +90,7 @@ app.get('/edit', async (req, res) => {
 app.get('/login', async (req, res) => {
     let content = await login.handleLogin(req, res);
 
-    if(content.user.userid !== 0) {
+    if (content.user.userid !== 0) {
         // login was successful... set cookies and redirect to /
         login.startUserSession(res, content.user);
     } else {
@@ -84,8 +103,8 @@ app.get('/login', async (req, res) => {
 // Logout
 app.get('/logout', (req, res) => {
     req.session.destroy();
-    res.cookie('username','');
-    res.cookie('userid','');
+    res.cookie('username', '');
+    res.cookie('userid', '');
     res.redirect('/login');
 });
 
@@ -120,20 +139,26 @@ app.get('/search/v2/', async (req, res) => {
     res.send(result);
 });
 
-
-// Server starten
-app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
+// Start the HTTPS server
+https.createServer(options, app).listen(PORT, () => {
+    console.log(`Debug: Server is running on https://localhost:${PORT}`);
 });
 
 async function wrapContent(content, req) {
     let headerHtml = await header(req);
-    return headerHtml+content+footer;
+    return headerHtml + content + footer;
 }
 
 function activeUserSession(req) {
     // check if cookie with user information ist set
-    console.log('in activeUserSession');
+    console.log('Debug: in activeUserSession');
     console.log(req.cookies);
     return req.cookies !== undefined && req.cookies.username !== undefined && req.cookies.username !== '';
 }
+
+module.exports = {
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_DATABASE
+};

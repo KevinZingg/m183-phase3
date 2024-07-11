@@ -1,3 +1,33 @@
+# Phase 3 Erledigt:
+
+URL zu den verbesserungen welche von Herr Ahmed gegeben wurde:
+
+https://github.com/ERMFox/M183/blob/main/README.md#lb2-phase-2
+
+
+FYI, wir haben das default Projekt wieder gepullt, weil mein Projekt nicht mehr funktioniert hat und wir immer Errors bekommen haben.
+
+Die Applikation hier ist also das default Projekt von der Lehrperson
+
+
+Gelöste Probleme:
+
+1
+2
+3
+4
+6 (ist im alten Projekt mit dem timeout, aber Herr Ahmed wollte einfach dass man es von 15 min timeout zu 5 wechselt und das hätte ich logischerweise machen können)
+7
+8
+11
+13
+14
+16
+
+
+
+
+
 # LB2 Applikation
 Diese Applikation ist bewusst unsicher programmiert und sollte nie in produktiven Umgebungen zum Einsatz kommen. Ziel der Applikation ist es, Lernende für mögliche Schwachstellen in Applikationen zu sensibilisieren, diese anzuleiten, wie die Schwachstellen aufgespürt und geschlossen werden können.
 
